@@ -1,11 +1,10 @@
-// AppNavigator.js
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Home from './screens/Home'; // Adjust import paths as needed
+import Home from './screens/Home'; 
 import Calendar from './screens/Calendar';
 import Profile from './screens/Profile';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // You can use any icon library
+import Icon from 'react-native-vector-icons/MaterialIcons'; 
 
 const Tab = createBottomTabNavigator();
 
@@ -27,6 +26,7 @@ const AppNavigator = () => {
 
             return <Icon name={iconName} size={size} color={color} />;
           },
+          headerShown: false,
         })}
       >
         <Tab.Screen name="Home" component={Home} />
