@@ -6,10 +6,6 @@ const Home = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text>Home</Text>
-      <Button
-        title="Go to Screen Two"
-        onPress={() => navigation.navigate('Calendar')}
-      />
     </View>
   );
 };

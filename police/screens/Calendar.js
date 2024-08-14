@@ -6,10 +6,6 @@ const Calendar = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text>Calendar</Text>
-      <Button
-        title="Go to Screen Three"
-        onPress={() => navigation.navigate('Profile')}
-      />
     </View>
   );
 };

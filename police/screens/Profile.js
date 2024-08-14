@@ -6,10 +6,6 @@ const Profile = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text>Profile</Text>
-      <Button
-        title="Go back to Screen One"
-        onPress={() => navigation.navigate('Home')}
-      />
     </View>
   );
 };
