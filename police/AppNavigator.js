@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Use your preferred icon library
+import Icon from 'react-native-vector-icons/MaterialIcons'; 
 
-import Login from './screens/Login'; // Import your screens
+import Login from './screens/Login'; 
 import Home from './screens/Home';
 import Calendar from './screens/Calendar';
 import Profile from './screens/Profile';
@@ -46,7 +46,7 @@ const AppNavigator = () => {
     // Simulate an authentication check (should be replaced with real authentication logic)
     const checkAuth = async () => {
       setTimeout(() => {
-        setIsLoggedIn(false); // Change this to true if the user is authenticated
+        setIsLoggedIn(false); 
       }, 1000);
     };
     checkAuth();
@@ -58,7 +58,7 @@ const AppNavigator = () => {
         {isLoggedIn ? (
           <Stack.Screen name="MainApp" component={MainApp} options={{ headerShown: false }} />
         ) : (
-          <Stack.Screen name="Login">
+          <Stack.Screen name="Login" options={{ headerShown: false }}>
             {props => <Login {...props} setIsLoggedIn={setIsLoggedIn} />}
           </Stack.Screen>
         )}
