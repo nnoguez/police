@@ -1,26 +1,26 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 
-const Login = ({ navigation }) => {
+const Login = ({ setIsLoggedIn }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    // Basic validation
     if (!email || !password) {
       Alert.alert('Validation Error', 'Please enter both email and password.');
       return;
     }
-
-    // You can add more complex logic here, such as making API calls
     Alert.alert('Login Successful', `Welcome, ${email}!`);
-    // Navigate to another screen if needed
-    // navigation.navigate('Home');
+    setIsLoggedIn(true); // Update state to show the main app
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Image
+        source={{ uri: 'https://i.ibb.co/zG0rYdV/Artboard-1.png' }}
+        style={styles.image}
+        resizeMode="cover"
+      />
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -28,6 +28,7 @@ const Login = ({ navigation }) => {
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        placeholderTextColor="#B0BEC5"
       />
       <TextInput
         style={styles.input}
@@ -35,6 +36,7 @@ const Login = ({ navigation }) => {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        placeholderTextColor="#B0BEC5"
       />
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
@@ -47,14 +49,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 16,
-    backgroundColor: '#f5f5f5',
+    padding: 36,
+    backgroundColor: '#0C1C2C',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 24,
-    textAlign: 'center',
+  image: {
+    width: 200,
+    height: 200,
+    alignSelf: 'center',
   },
   input: {
     height: 50,
@@ -63,11 +64,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 16,
     marginBottom: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#2A3D55',
+    color: '#D0D6DF',
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#F39C12',
     paddingVertical: 14,
+    marginTop: 50,
     borderRadius: 8,
     alignItems: 'center',
   },
