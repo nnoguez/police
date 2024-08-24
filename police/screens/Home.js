@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
 import * as Progress from 'react-native-progress';
 
 const Home = ({ navigation }) => {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [punchInOutText, setPunchInOutText] = useState('Punch In');
   const [breakText, setBreakText] = useState('Start Break');
+  const [shiftStart, setShiftStart] = useState('06:30');
+  const [shiftEnd, setShiftEnd] = useState('18:30');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -15,8 +17,57 @@ const Home = ({ navigation }) => {
     return () => clearInterval(timer);
   }, []);
 
+  // Format time for comparison
+  const formatTime = (date) => {
+    const options = { hour: '2-digit', minute: '2-digit', hour12: false };
+    return date.toLocaleTimeString('en-US', options);
+  };
+
+  // Check if within allowable punch time
+  const isWithinTimeFrame = (startTime, endTime) => {
+    const start = new Date();
+    const end = new Date();
+
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+
+    start.setHours(startHour, startMinute, 0);
+    end.setHours(endHour, endMinute, 0);
+
+    const fifteenMinutesBefore = new Date(start.getTime() - 15 * 60 * 1000);
+    const fifteenMinutesAfter = new Date(end.getTime() + 15 * 60 * 1000);
+
+    return currentDateTime >= fifteenMinutesBefore && currentDateTime <= fifteenMinutesAfter;
+  };
+
+  // Check for alert if punch-in is missed
+  const checkForAlert = () => {
+    const shiftStartTime = new Date();
+    const [startHour, startMinute] = shiftStart.split(':').map(Number);
+    shiftStartTime.setHours(startHour, startMinute, 0);
+
+    const fiveMinutesAfterShiftStart = new Date(shiftStartTime.getTime() + 5 * 60 * 1000);
+
+    if (currentDateTime > shiftStartTime && currentDateTime < fiveMinutesAfterShiftStart && punchInOutText === 'Punch In') {
+      Alert.alert('Alert', 'Have you begun your shift yet?', [{ text: 'OK' }]);
+    }
+  };
+
+  useEffect(() => {
+    checkForAlert();
+  }, [currentDateTime]);
+
+  // Determine button color
+  const punchButtonStyle = isWithinTimeFrame(shiftStart, shiftEnd)
+    ? styles.punchButton
+    : { ...styles.punchButton, backgroundColor: '#BDC3C7' };
+
   const handlePunchInOut = () => {
-    setPunchInOutText((prevText) => (prevText === 'Punch In' ? 'Punch Out' : 'Punch In'));
+    if (isWithinTimeFrame(shiftStart, shiftEnd)) {
+      setPunchInOutText((prevText) => (prevText === 'Punch In' ? 'Punch Out' : 'Punch In'));
+    } else {
+      Alert.alert('Error', 'You can only punch in/out within your shift timeframe or 15 minutes before/after.');
+    }
   };
 
   const handleBreak = () => {
@@ -29,11 +80,7 @@ const Home = ({ navigation }) => {
     day: 'numeric',
   });
 
-  const formattedTime = currentDateTime.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true,
-  });
+  const formattedTime = formatTime(currentDateTime);
 
   // Example data for days left in each phase
   const phases = [
@@ -55,11 +102,14 @@ const Home = ({ navigation }) => {
 
         <View style={styles.trainingContainer}>
           <Text style={styles.trainingText}>Training</Text>
-          <Text style={styles.assignedFTO}>
+          <Text style={styles.shiftCat}>
             <Text style={styles.boldLabel}>Assigned FTO:</Text> [First Name Last Name]
           </Text>
-          <Text style={styles.shiftTime}>
-            <Text style={styles.boldLabel}>Next Shift:</Text> 6:30 AM - 18:30 PM
+          <Text style={styles.shiftCat}>
+            <Text style={styles.boldLabel}>Group:</Text> Alpha (Day Shift)
+          </Text>
+          <Text style={styles.shiftCat}>
+            <Text style={styles.boldLabel}>Next Shift:</Text> {shiftStart} - {shiftEnd} (12h)
           </Text>
 
           <View style={styles.phasesContainer}>
@@ -78,13 +128,13 @@ const Home = ({ navigation }) => {
           </View>
         </View>
         <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.punchButton} onPress={handlePunchInOut}>
-              <Text style={styles.buttonText}>{punchInOutText}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.breakButton} onPress={handleBreak}>
-              <Text style={styles.buttonText}>{breakText}</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={punchButtonStyle} onPress={handlePunchInOut}>
+            <Text style={styles.buttonText}>{punchInOutText}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.breakButton} onPress={handleBreak}>
+            <Text style={styles.buttonText}>{breakText}</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     </SafeAreaView>
   );
@@ -136,14 +186,9 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
   },
-  assignedFTO: {
+  shiftCat: {
     fontSize: 16,
     marginBottom: 15,
-    color: 'white',
-  },
-  shiftTime: {
-    fontSize: 16,
-    marginBottom: 20,
     color: 'white',
   },
   boldLabel: {
