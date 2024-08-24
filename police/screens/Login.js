@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     alignSelf: 'center',
+    marginBottom: -10
   },
   input: {
     height: 50,
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 20,
     backgroundColor: '#2A3D55',
     color: '#D0D6DF',
   },

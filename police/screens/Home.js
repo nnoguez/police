@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
 import * as Progress from 'react-native-progress';
+import { FontAwesome } from '@expo/vector-icons';
 
 const Home = ({ navigation }) => {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -40,16 +41,23 @@ const Home = ({ navigation }) => {
     return currentDateTime >= fifteenMinutesBefore && currentDateTime <= fifteenMinutesAfter;
   };
 
-  // Check for alert if punch-in is missed
+  // Check for alert if punch-in or punch-out is missed
   const checkForAlert = () => {
     const shiftStartTime = new Date();
     const [startHour, startMinute] = shiftStart.split(':').map(Number);
     shiftStartTime.setHours(startHour, startMinute, 0);
 
+    const shiftEndTime = new Date();
+    const [endHour, endMinute] = shiftEnd.split(':').map(Number);
+    shiftEndTime.setHours(endHour, endMinute, 0);
+
     const fiveMinutesAfterShiftStart = new Date(shiftStartTime.getTime() + 5 * 60 * 1000);
+    const fiveMinutesAfterShiftEnd = new Date(shiftEndTime.getTime() + 5 * 60 * 1000);
 
     if (currentDateTime > shiftStartTime && currentDateTime < fiveMinutesAfterShiftStart && punchInOutText === 'Punch In') {
       Alert.alert('Alert', 'Have you begun your shift yet?', [{ text: 'OK' }]);
+    } else if (currentDateTime > shiftEndTime && currentDateTime < fiveMinutesAfterShiftEnd && punchInOutText === 'Punch Out') {
+      Alert.alert('Alert', 'Did you remember to punch out after your shift?', [{ text: 'OK' }]);
     }
   };
 
@@ -60,13 +68,13 @@ const Home = ({ navigation }) => {
   // Determine button color
   const punchButtonStyle = isWithinTimeFrame(shiftStart, shiftEnd)
     ? styles.punchButton
-    : { ...styles.punchButton, backgroundColor: '#BDC3C7' };
+    : { ...styles.punchButton, backgroundColor: 'grey' };
 
   const handlePunchInOut = () => {
     if (isWithinTimeFrame(shiftStart, shiftEnd)) {
       setPunchInOutText((prevText) => (prevText === 'Punch In' ? 'Punch Out' : 'Punch In'));
     } else {
-      Alert.alert('Error', 'You can only punch in/out within your shift timeframe or 15 minutes before/after.');
+      Alert.alert('Punch disabled', 'You can only punch in/out within your shift timeframe or 15 minutes before/after.');
     }
   };
 
@@ -93,12 +101,25 @@ const Home = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <SafeAreaView style={styles.containerContain}>
-        <Text style={styles.welcomeText}>Welcome, [OIT Name]</Text>
-
         <View style={styles.dateTimeContainer}>
           <Text style={styles.dateText}>{formattedDate}</Text>
           <Text style={styles.timeText}>{formattedTime}</Text>
         </View>
+
+        <Text style={styles.welcomeText}>Welcome, [OIT Name]</Text>
+
+        <View style={styles.shiftContainer}>
+          <View style={styles.nextShiftRow}>
+            <Text style={styles.boldLabel}>Next Shift:</Text>
+            <Text style={styles.shiftTimeText}>In 3 days</Text>
+          </View>
+          <Text style={styles.shiftTime}>{shiftStart} - {shiftEnd} (12h)</Text>
+          <View style={styles.locationRow}>
+            <FontAwesome name="map-marker" size={20} color="#F39C12" />
+            <Text style={styles.locationText}>Orlando Police Department</Text>
+          </View>
+        </View>
+
 
         <View style={styles.trainingContainer}>
           <Text style={styles.trainingText}>Training</Text>
@@ -108,16 +129,16 @@ const Home = ({ navigation }) => {
           <Text style={styles.shiftCat}>
             <Text style={styles.boldLabel}>Group:</Text> Alpha (Day Shift)
           </Text>
-          <Text style={styles.shiftCat}>
-            <Text style={styles.boldLabel}>Next Shift:</Text> {shiftStart} - {shiftEnd} (12h)
-          </Text>
 
           <View style={styles.phasesContainer}>
             {phases.map(({ phase, daysLeft, totalDays }) => (
               <View key={phase} style={styles.phaseCircle}>
                 <Text style={styles.phaseText}>{phase}</Text>
                 <Progress.Circle
-                  size={70}
+                  size={75}
+
+                  thickness={6}
+                  borderWidth={3} 
                   progress={(totalDays - daysLeft) / totalDays}
                   showsText={true}
                   formatText={() => `${daysLeft}`}
@@ -146,27 +167,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#0C1C2C',
   },
   containerContain: {
-    margin: 20,
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'left',
-    marginBottom: 50,
-    marginTop: 20,
-    color: 'white',
+    margin: 15,
   },
   dateTimeContainer: {
-    backgroundColor: '#2C3E50',
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 30,
+    margin: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   dateText: {
-    fontSize: 23,
+    fontSize: 18,
     color: 'white',
     fontWeight: 'bold',
   },
@@ -174,8 +184,47 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'white',
   },
+  welcomeText: {
+    margin: 10,
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'left',
+    marginBottom: 40,
+    color: '#F39C12',
+  },
+  shiftContainer: {
+    backgroundColor: '#34495E',
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 30,
+  },
+  nextShiftRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    color: 'white'
+  },
+  shiftTimeText: {
+    color: '#F39C12',
+    fontWeight: 'bold',
+    marginLeft: 5,
+  },
+  shiftTime: {
+    marginTop: 5,
+    fontSize: 18,
+    color: 'white',
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  locationText: {
+    marginLeft: 5,
+    color: 'white',
+  },
   trainingContainer: {
-    backgroundColor: '#2A3D55',
+    backgroundColor: '#34495E',
     padding: 20,
     borderRadius: 10,
   },
@@ -183,7 +232,7 @@ const styles = StyleSheet.create({
     fontSize: 23,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: 'white',
+    color: '#F39C12',
     textAlign: 'center',
   },
   shiftCat: {
@@ -193,20 +242,26 @@ const styles = StyleSheet.create({
   },
   boldLabel: {
     fontWeight: 'bold',
+    color: 'white'
   },
   phasesContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    backgroundColor: '#0C1C2C',
+    padding: '3%',
+    borderRadius: 10,
+    marginHorizontal: '-3%'
   },
   phaseCircle: {
     alignItems: 'center',
+    padding: 10,
   },
   phaseText: {
     fontSize: 16,
     marginTop: 10,
-    color: 'white',
+    color: '#F39C12',
     marginBottom: 10,
-    fontWeight: 'bold', 
+    fontWeight: 'bold',
   },
   buttonsContainer: {
     flexDirection: 'row',
@@ -222,7 +277,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   breakButton: {
-    backgroundColor: '#B0BEC5',
+    backgroundColor: '#34495E',
     padding: 15,
     borderRadius: 5,
     flex: 1,
